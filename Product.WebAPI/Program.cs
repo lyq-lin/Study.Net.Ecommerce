@@ -21,6 +21,7 @@ builder.Services.AddDbContext<ProductDbContext>(opt =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductTypeRepository, ProductTypeRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 
 
 //≈‰÷√øÁ”Ú
