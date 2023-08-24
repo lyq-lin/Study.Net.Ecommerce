@@ -7,5 +7,6 @@ namespace Product.Domain
 		Task<List<ProductType>> FindAllProductTypeAsync();
 
 		Task<List<ProductType>> GetProductTypeByProductIdAsync(Guid ProductId);
+		Task<string> GetTypeNameByProductTypeId(Guid productTypeId);
 	}
 }

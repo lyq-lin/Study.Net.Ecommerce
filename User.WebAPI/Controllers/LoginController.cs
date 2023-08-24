@@ -1,4 +1,5 @@
 ﻿using Common.Jwt;
+using Common.RabbitMQ;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -18,13 +19,15 @@ namespace User.WebAPI.Controllers
 		private readonly ITokenService _tokenService;
 		private readonly IUserRepository _userRepository;
 		private readonly IOptionsSnapshot<JwtSetting> _options;
+		private readonly IRabbitMqService _rabbitMqService;
 
-		public LoginController(UserDomainService domainService, ITokenService tokenService, IUserRepository userRepository, IOptionsSnapshot<JwtSetting> options)
+		public LoginController(UserDomainService domainService, ITokenService tokenService, IUserRepository userRepository, IOptionsSnapshot<JwtSetting> options, IRabbitMqService rabbitMqService)
 		{
 			_domainService = domainService;
 			_tokenService = tokenService;
 			_userRepository = userRepository;
 			_options = options;
+			_rabbitMqService = rabbitMqService;
 		}
 
 		[HttpPost]
@@ -63,6 +66,8 @@ namespace User.WebAPI.Controllers
 					};
 					string jwt = _tokenService.BuildToken(claims, _options.Value);
 					resp.Data = jwt;
+
+					await _rabbitMqService.PublishMessage("ycode_shop", isExist.Id.ToString(), isExist.JwtVersion.ToString(), "");
 
 					return Ok(resp);
 				case UserAccessResult.PhoneNumberNotFound:
@@ -113,6 +118,8 @@ namespace User.WebAPI.Controllers
 					string jwt = _tokenService.BuildToken(claims, _options.Value);
 					resp.Data = jwt;
 
+					await _rabbitMqService.PublishMessage("ycode_shop", isExist.Id.ToString(), isExist.JwtVersion.ToString(), "");
+
 					return Ok(resp);
 				case CheckCodeResult.PhoneNumberNotFound:
 				case CheckCodeResult.CodeError:
@@ -128,6 +135,28 @@ namespace User.WebAPI.Controllers
 			}
 		}
 
+		[HttpPost]
+		[UnitOfWork(typeof(UserDbContext))]
+		public async Task<ActionResult<ServiceResponse<bool>>> Logout()
+		{
+			ServiceResponse<bool> resp = new ServiceResponse<bool>();
+			var claim_UserId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+			var isExist = await _userRepository.FindOneAsync(Guid.Parse(claim_UserId));
+			if (isExist == null)
+			{
+				resp.Success = false;
+				resp.Message = "登出失败";
+				return BadRequest(resp);
+			}
+
+			_domainService.UpdateJwtVersion(isExist);
+
+			await _rabbitMqService.PublishMessage("ycode_shop", isExist.Id.ToString(), isExist.JwtVersion.ToString(), "");
+
+			resp.Message = "登出成功";
+
+			return Ok(resp);
+		}
 
 		[HttpPost]
 		[NotCheckJwtVersion]

@@ -31,5 +31,11 @@ namespace Product.Infrastructure
 
 			return productTypes;
 		}
+
+		public async Task<string> GetTypeNameByProductTypeId(Guid productTypeId)
+		{
+			var result = await _dbContext.ProductTypes.FindAsync(productTypeId);
+			return result.Name;
+		}
 	}
 }

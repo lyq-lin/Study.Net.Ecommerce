@@ -12,6 +12,7 @@ namespace Common.RabbitMQ
 		{
 			_channel = model;
 		}
+
 		public async Task<string> ConsumeMessage(string exchange, string queueName, string routingKey, string type = "fanout")
 		{
 			string message = string.Empty;
@@ -52,7 +53,40 @@ namespace Common.RabbitMQ
 			_channel.QueueBind(queueName, exchange, routingKey);
 
 			var body = Encoding.UTF8.GetBytes(message);
-			_channel.BasicPublish(exchange, queueName, null, body);
+
+			if (type.Equals("fanout"))
+			{
+				_channel.BasicPublish(exchange, queueName, null, body);
+			}
+			else
+			{
+				_channel.BasicPublish(exchange, routingKey, null, body);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		public Task SubscribeMessage(string exchange, string queueName, string routingKey, Action<string> del, string type = "direct")
+		{
+			_channel.ExchangeDeclare(exchange, type);
+			_channel.QueueDeclare(queueName, false, false, false, null);
+			_channel.QueueBind(queueName, exchange, routingKey);
+
+			var customer = new AsyncEventingBasicConsumer(_channel);
+
+			customer.Received += async (model, _event) =>
+			{
+				var body = _event.Body;
+				string message = Encoding.UTF8.GetString(body.ToArray());
+
+				Console.WriteLine("----------------删除之前----------------");
+				
+				del(message);
+
+				Console.WriteLine("----------------删除之后----------------");
+			};
+
+			_channel.BasicConsume(queueName, true, customer);
 
 			return Task.CompletedTask;
 		}

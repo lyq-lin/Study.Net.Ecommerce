@@ -42,5 +42,15 @@ namespace Product.WebAPI.Controllers
 
 			return Ok(resp);
 		}
+
+		[HttpGet("{productTypeId}")]
+		public async Task<ActionResult<ServiceResponse<string>>> GetTypeNameByTypeId(Guid productTypeId)
+		{
+			string TypeName =  await _productTypeRepository.GetTypeNameByProductTypeId(productTypeId);
+
+			ServiceResponse<string> resp = new ServiceResponse<string>() { Data = TypeName };
+
+			return Ok(resp);
+		}
 	}
 }

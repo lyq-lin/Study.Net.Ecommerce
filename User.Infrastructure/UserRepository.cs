@@ -56,7 +56,7 @@ namespace User.Infrastructure
 		{
 			string key = $"PhoneNumberCode_{phone.RegionNumber}_{phone.PhoneNumberValue}";
 
-			return _distributedCache.SetStringAsync(key, code, new DistributedCacheEntryOptions
+            return _distributedCache.SetStringAsync(key, code, new DistributedCacheEntryOptions
 			{
 				AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
 			});

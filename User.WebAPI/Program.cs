@@ -1,4 +1,5 @@
 using Common.Jwt;
+using Common.RabbitMQ;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,9 @@ builder.Services.AddSwaggerGen(opt =>
 var JwtConfig = builder.Configuration.GetSection("Jwt");
 builder.Services.AddJwtAuthentication(JwtConfig.Get<JwtSetting>());
 builder.Services.Configure<JwtSetting>(JwtConfig);
+
+//×¢ÈëRabbitMq
+builder.Services.AddRabbitMQ();
 
 //×¢ÈëDbContext
 builder.Services.AddDbContext<UserDbContext>(opt =>
@@ -57,6 +61,16 @@ builder.Services.AddScoped<UserDomainService>();
 builder.Services.AddScoped<ISmsCodeSender, SmsCodeSender>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
+
+builder.Services.AddCors(opt =>
+{
+	opt.AddDefaultPolicy(bui =>
+	{
+		bui.WithOrigins(new string[] { "http://localhost:8080" })
+		.AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+	});
+});
 
 var app = builder.Build();
 
@@ -67,7 +81,11 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
