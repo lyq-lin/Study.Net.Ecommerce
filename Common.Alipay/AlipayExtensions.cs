@@ -24,7 +24,7 @@ namespace Common.Alipay
 			AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
 
 			//支付成功后，返回到的前端地址
-			request.SetReturnUrl("http://localhost:8080/#/payment-success");
+			request.SetReturnUrl("http://43.143.170.48:8080/#/payment-success");
 
 			//支付状态异步回调地址 : 必须是支付宝服务器能访问到的公网地址
 			//todo : 端口

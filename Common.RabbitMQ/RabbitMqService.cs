@@ -78,12 +78,7 @@ namespace Common.RabbitMQ
 			{
 				var body = _event.Body;
 				string message = Encoding.UTF8.GetString(body.ToArray());
-
-				Console.WriteLine("----------------删除之前----------------");
-				
 				del(message);
-
-				Console.WriteLine("----------------删除之后----------------");
 			};
 
 			_channel.BasicConsume(queueName, true, customer);

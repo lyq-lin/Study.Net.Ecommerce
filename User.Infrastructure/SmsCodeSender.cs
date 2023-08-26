@@ -27,13 +27,13 @@ namespace User.Infrastructure
 
 		private static void UseSms(string phone, string token)
 		{
-			var client = CreateClient($@"LTAI5tCJiQbJEALaBRXmuPNU", $@"vQSx23QT5aF2Xveslq5EQUENrDWOMC");
+			var client = CreateClient($@"输入你的KeyId", $@"输入你的KeySecret");
 
 			SendSmsRequest sendSmsRequest = new SendSmsRequest()
 			{
 				PhoneNumbers = phone,
-				SignName = "林渝乔的博客",
-				TemplateCode = "SMS_461085642",
+				SignName = "输入你的模板签名",
+				TemplateCode = "输入你的模板Code",
 				TemplateParam = $"{{\"code\":\"{token}\"}}"
 			};
 
